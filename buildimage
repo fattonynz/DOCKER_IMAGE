@@ -1,0 +1,81 @@
+pipeline {
+    environment 
+    {
+        registry = "dni-container-registry.artifacts.internal.spark.co.nz"
+        image_name = "i-dnibase"
+        vtag = "2.3"
+    }     
+    agent any
+    stages {         
+        stage('Pull si_automation library') {
+            steps {
+		        sh 'mkdir -p si_automation'
+		        dir('si_automation/') {
+                    git credentialsId: 'onpremado_sshkey',
+			        url:  'ssh://sparkado.internal.spark.co.nz:22/sparknz_security/Security%20Infrastructure/_git/global_si_automation'
+		        }                
+            }
+        }        
+        stage('stash files') {
+            steps {                 
+                stash name: "toglobal", includes: "**"
+            }
+        }
+        stage('Move to global') {
+	        agent { label 'global_agent' }
+            options { skipDefaultCheckout() }
+	        stages {
+	            stage('Unstash') {
+                    steps {
+                        unstash name: "toglobal"
+                        sh "ls -la"
+                    }	                
+	            }
+                stage('Delete image') {
+                    steps {
+                        script {
+                            image_id = sh (script: "docker images -q ${registry}/${image_name}:${vtag}", returnStdout: true).trim() 
+                            if (!image_id.isEmpty()) { 
+                                echo "Image found"
+                                container_id = sh (script: "docker ps --filter ancestor=${registry}/${image_name}:${vtag} -q", returnStdout: true).trim()
+                                if (container_id.isEmpty()) {
+                                    sh 'docker image rm ${registry}/${image_name}:${vtag}'                            
+                                }
+                                else {
+                                    list = container_id.split("\\r?\\n")
+                                    for (int i = 0; i < list.size(); i++) {
+                                        sh "docker rm -f ${list[i]}"
+                                    }                                                         
+                                    sh 'docker image rm ${registry}/${image_name}:${vtag}'
+                                }
+                                echo "Image removed"
+                            }
+                            else { 
+                                echo "Image not found"
+                                echo "continue"
+                            }
+                        }
+                    }
+                }                                       
+                stage('Build docker image') {
+                    steps {
+                    //   sh " mv sachin/* . && rm -r sachin"
+                        sh "ls -la"
+                        withCredentials([usernamePassword(credentialsId: 'svc_details', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                            sh 'docker login -u $USERNAME -p $PASSWORD ${registry}'
+                            sh "docker build --tag ${registry}/${image_name}:${vtag} ."
+                            sh "docker push ${registry}/${image_name}:${vtag}"
+                            sh "docker image rm ${registry}/${image_name}:${vtag}"
+                            sh "echo hello $USERNAME"
+                        }
+                    }
+                }                                                                   
+            }
+        }            
+    }
+    post { 
+        always { 
+            cleanWs()
+        }
+    }    
+}
