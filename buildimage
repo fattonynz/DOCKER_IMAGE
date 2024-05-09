@@ -14,7 +14,7 @@ pipeline {
             }
         }
         stage('Move to global') {
-	       /// agent { label 'global_agent' }
+	       /// agent { label 'sdpcdi_agent' }
             options { skipDefaultCheckout() }
 	        stages {
 	            stage('Unstash') {
