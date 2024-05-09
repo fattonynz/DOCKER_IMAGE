@@ -1,8 +1,6 @@
 # Use the official Debian image as the base image
 FROM debian:12
 
-ENV http_proxy=http://webproxy01.sdp.net.nz:8080
-ENV https_proxy=http://webproxy01.sdp.net.nz:8080
 # Update the package repository and install required tools
 RUN apt-get update && \
     apt-get install -y python3 python3-pip ansible && \
