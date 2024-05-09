@@ -30,7 +30,7 @@ pipeline {
                         sh "ls -la"
                       
                          
-                            sh "docker build ${image_name}:${vtag} ."
+                            sh "docker build --tag ${image_name}:${vtag} ."
                           
                           
                             sh "echo hello $USERNAME"
