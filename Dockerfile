@@ -79,7 +79,20 @@ COPY . /app
 # Install Python & Ansible Dependencies
 RUN pip3 install --no-cache --upgrade pip
 # Install Python libraries for Arista CloudVision
-RUN pip3 install --no-cache -r /app/requirements/requirements.txt
+#RUN pip3 install --no-cache -r /app/requirements/requirements.txt
+RUN pip3 install wheel>=0.37.1
+RUN pip3 install netaddr>=0.7.19
+RUN pip3 install Jinja2>=2.11.3
+RUN pip3 install treelib>=1.5.5
+RUN pip3 install cvprac>=1.0.7
+RUN pip3 install paramiko>=2.7.1
+RUN pip3 install jsonschema>=3.2.0
+RUN pip3 install requests>=2.25.1
+RUN pip3 install PyYAML>=5.4.1
+RUN pip3 install md-toc>=7.1.0
+RUN pip3 install iptools>=0.7.0
+RUN pip3 install jsonrpclib>=0.2.1
+RUN pip3 install ruamel.yaml>=0.17.21
 # Install Ansible 
 RUN pip3 install --no-cache ansible-core>=2.11.3
 
