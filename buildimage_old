@@ -3,7 +3,7 @@ pipeline {
     {
         registry = "dni-container-registry.artifacts.internal.spark.co.nz"
         image_name = "i-dnibase"
-        vtag = "2.9"
+        vtag = "2.3"
     }     
     agent any
     stages {         
